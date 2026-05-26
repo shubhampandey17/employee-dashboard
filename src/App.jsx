@@ -1,13 +1,14 @@
-import { useState } from 'react'
-import './App.css'
+import react from 'react'
+import { BrowserRouter } from 'react-router-dom'
+import AppRoutes from './routes/AppRoutes'
 
 function App() {
 
   return (
     <>
-      <div>
-        Employee Dashboard
-      </div>
+    <BrowserRouter>
+      <AppRoutes/>
+    </BrowserRouter>
     </>
   )
 }
