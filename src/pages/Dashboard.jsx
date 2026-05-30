@@ -20,37 +20,72 @@ const Dashboard = () => {
   ]);
 
   const [searchValue, setSearchValue] = useState("");
-
   const [addEmployeeModal, setAddEmployeeModal] = useState(false);
+  const [selectedEmployee, setSelectedEmployee] = useState(null);
 
   const [employeeName, setEmployeeName] = useState("");
-
   const [employeeDepartment, setEmployeeDepartment] = useState("");
-
   const [employeeStatus, setEmployeeStatus] = useState("");
-
   const [employeeSalary, setEmployeeSalary] = useState("");
 
   const [nameError, setNameError] = useState(false);
-
   const [departmentError, setDepartmentError] = useState(false);
-
   const [statusError, setStatusError] = useState(false);
-
   const [salaryError, setSalaryError] = useState(false);
 
-const onChangeInputSearch =
-  (e) => {
-    setSearchValue(
-      e.target.value
-    );
+  useEffect(()=>{
+    let item = localStorage.getItem("employeeData");
+    item && setEmployeeData(JSON.parse(item))
+  },[])
+
+  useEffect(()=>{
+    localStorage.setItem("employeeData", JSON.stringify(employeeData));
+  },[employeeData])
+
+  const onChangeInputSearch = (e) => {
+    setSearchValue(e.target.value);
+  };
+
+  const resetForm = () => {
+    setEmployeeName("");
+    setEmployeeDepartment("");
+    setEmployeeStatus("");
+    setEmployeeSalary("");
+
+    setNameError(false);
+    setDepartmentError(false);
+    setStatusError(false);
+    setSalaryError(false);
+  };
+
+  const closeModal = () => {
+    setAddEmployeeModal(false);
+    setSelectedEmployee(null);
+    resetForm();
   };
 
   const addEmployee = () => {
+    setSelectedEmployee(null);
+    resetForm();
     setAddEmployeeModal(true);
   };
 
-  const validateEmployeeForm = () => {
+  const editEmployee = (employee) => {
+    setSelectedEmployee(employee);
+
+    setEmployeeName(employee.name);
+    setEmployeeDepartment(employee.department);
+    setEmployeeStatus(employee.status);
+    setEmployeeSalary(employee.salary);
+
+    setAddEmployeeModal(true);
+  };
+
+  const deleteEmployee = (id) => {
+    setEmployeeData((prev) => prev.filter((employee) => employee.id !== id));
+  };
+
+  const handleSubmit = () => {
     let isValid = true;
 
     if (!employeeName.trim()) {
@@ -73,19 +108,36 @@ const onChangeInputSearch =
       isValid = false;
     }
 
-    if (isValid) {
+    if (!isValid) return;
 
-      setEmployeeData((prev)=>[...prev , {
-        'department' : employeeDepartment , 'id' : prev.length+1 , 'name' : employeeName, 'salary' : employeeSalary , status : employeeStatus 
-      }])
-
-
-      setAddEmployeeModal(false);
-      setEmployeeName("");
-      setEmployeeDepartment("");
-      setEmployeeStatus("");
-      setEmployeeSalary("");
+    if (selectedEmployee) {
+      setEmployeeData((prev) =>
+        prev.map((employee) =>
+          employee.id === selectedEmployee.id
+            ? {
+                ...employee,
+                name: employeeName,
+                department: employeeDepartment,
+                salary: employeeSalary,
+                status: employeeStatus,
+              }
+            : employee,
+        ),
+      );
+    } else {
+      setEmployeeData((prev) => [
+        ...prev,
+        {
+          id: Date.now(),
+          name: employeeName,
+          department: employeeDepartment,
+          salary: employeeSalary,
+          status: employeeStatus,
+        },
+      ]);
     }
+
+    closeModal();
   };
 
   return (
@@ -96,32 +148,26 @@ const onChangeInputSearch =
 
       <div>
         {employeeData
-        .filter((data) => {
-          return (
-            data.name
-              .toLowerCase()
-              .includes(
-                searchValue.toLowerCase()
-              ) ||
-            data.department
-              .toLowerCase()
-              .includes(
-                searchValue.toLowerCase()
-              )
-          );
-        })
-        .map((data) => {
-          return (
-            <EmployeeCard
-              key={data.id}
-              id={data.id}
-              name={data.name}
-              department={data.department}
-              salary={data.salary}
-              status={data.status}
-            />
-          );
-        })}
+          .filter((data) => {
+            return (
+              data.name.toLowerCase().includes(searchValue.toLowerCase()) ||
+              data.department.toLowerCase().includes(searchValue.toLowerCase())
+            );
+          })
+          .map((data) => {
+            return (
+              <EmployeeCard
+                key={data.id}
+                id={data.id}
+                name={data.name}
+                department={data.department}
+                salary={data.salary}
+                status={data.status}
+                editEmployee={editEmployee}
+                deleteEmployee={deleteEmployee}
+              />
+            );
+          })}
       </div>
 
       {addEmployeeModal && (
@@ -146,12 +192,15 @@ const onChangeInputSearch =
               width: "400px",
               minHeight: "250px",
               boxShadow: "0px 4px 10px rgba(0,0,0,0.2)",
+              display: "flex",
+              flexDirection: "column",
+              gap: "10px",
             }}>
-            <h1>Add Employee</h1>
+            <h1>{selectedEmployee ? "Edit Employee" : "Add Employee"}</h1>
 
             <input
               type="text"
-              placeholder="name"
+              placeholder="Name"
               value={employeeName}
               onChange={(e) => {
                 setEmployeeName(e.target.value);
@@ -159,18 +208,11 @@ const onChangeInputSearch =
               }}
             />
 
-            {nameError && (
-              <p
-                style={{
-                  color: "red",
-                }}>
-                Name is required
-              </p>
-            )}
+            {nameError && <p style={{ color: "red", margin: 0 }}>Name is required</p>}
 
             <input
               type="text"
-              placeholder="department"
+              placeholder="Department"
               value={employeeDepartment}
               onChange={(e) => {
                 setEmployeeDepartment(e.target.value);
@@ -178,18 +220,11 @@ const onChangeInputSearch =
               }}
             />
 
-            {departmentError && (
-              <p
-                style={{
-                  color: "red",
-                }}>
-                Department is required
-              </p>
-            )}
+            {departmentError && <p style={{ color: "red", margin: 0 }}>Department is required</p>}
 
             <input
               type="text"
-              placeholder="status"
+              placeholder="Status"
               value={employeeStatus}
               onChange={(e) => {
                 setEmployeeStatus(e.target.value);
@@ -197,18 +232,11 @@ const onChangeInputSearch =
               }}
             />
 
-            {statusError && (
-              <p
-                style={{
-                  color: "red",
-                }}>
-                Status is required
-              </p>
-            )}
+            {statusError && <p style={{ color: "red", margin: 0 }}>Status is required</p>}
 
             <input
               type="number"
-              placeholder="salary"
+              placeholder="Salary"
               value={employeeSalary}
               onChange={(e) => {
                 setEmployeeSalary(e.target.value);
@@ -216,18 +244,11 @@ const onChangeInputSearch =
               }}
             />
 
-            {salaryError && (
-              <p
-                style={{
-                  color: "red",
-                }}>
-                Salary is required
-              </p>
-            )}
+            {salaryError && <p style={{ color: "red", margin: 0 }}>Salary is required</p>}
 
-            <button onClick={validateEmployeeForm}>Add Employee</button>
+            <button onClick={handleSubmit}>{selectedEmployee ? "Update Employee" : "Add Employee"}</button>
 
-            <button onClick={() => setAddEmployeeModal(false)}>Close</button>
+            <button onClick={closeModal}>Close</button>
           </div>
         </div>
       )}
