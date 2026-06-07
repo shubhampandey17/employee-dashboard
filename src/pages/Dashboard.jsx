@@ -17,6 +17,111 @@ const Dashboard = () => {
       salary: 70000,
       status: "Inactive",
     },
+    {
+      id: 1,
+      name: "Shubham",
+      department: "Frontend",
+      salary: 50000,
+      status: "Active",
+    },
+    {
+      id: 2,
+      name: "Rahul",
+      department: "Backend",
+      salary: 70000,
+      status: "Inactive",
+    },
+    {
+      id: 1,
+      name: "Shubham",
+      department: "Frontend",
+      salary: 50000,
+      status: "Active",
+    },
+    {
+      id: 2,
+      name: "Rahul",
+      department: "Backend",
+      salary: 70000,
+      status: "Inactive",
+    },
+    {
+      id: 1,
+      name: "Shubham",
+      department: "Frontend",
+      salary: 50000,
+      status: "Active",
+    },
+    {
+      id: 2,
+      name: "Rahul",
+      department: "Backend",
+      salary: 70000,
+      status: "Inactive",
+    },
+    {
+      id: 1,
+      name: "Shubham",
+      department: "Frontend",
+      salary: 50000,
+      status: "Active",
+    },
+    {
+      id: 2,
+      name: "Rahul",
+      department: "Backend",
+      salary: 70000,
+      status: "Inactive",
+    },
+    {
+      id: 1,
+      name: "Shubham",
+      department: "Frontend",
+      salary: 50000,
+      status: "Active",
+    },
+    {
+      id: 2,
+      name: "Rahul",
+      department: "Backend",
+      salary: 70000,
+      status: "Inactive",
+    },
+    {
+      id: 1,
+      name: "Shubham",
+      department: "Frontend",
+      salary: 50000,
+      status: "Active",
+    },
+    {
+      id: 2,
+      name: "Rahul",
+      department: "Backend",
+      salary: 70000,
+      status: "Inactive",
+    },
+    {
+      id: 1,
+      name: "Shubham",
+      department: "Frontend",
+      salary: 50000,
+      status: "Active",
+    },
+    {
+      id: 2,
+      name: "Rahul",
+      department: "Backend",
+      salary: 70000,
+      status: "Inactive",
+    },
+    {
+      id: 1,
+      name: "Shubham",
+      department: "Frontend",
+      salary: 50000,
+      status: "Active",
+    },
   ]);
 
   const [searchValue, setSearchValue] = useState("");
@@ -32,6 +137,7 @@ const Dashboard = () => {
   const [departmentError, setDepartmentError] = useState(false);
   const [statusError, setStatusError] = useState(false);
   const [salaryError, setSalaryError] = useState(false);
+  const [visibleCount, setVisibleCount] = useState(5)
 
   useEffect(()=>{
     let item = localStorage.getItem("employeeData");
@@ -154,6 +260,7 @@ const Dashboard = () => {
               data.department.toLowerCase().includes(searchValue.toLowerCase())
             );
           })
+          .slice(0,visibleCount)
           .map((data) => {
             return (
               <EmployeeCard
@@ -169,6 +276,10 @@ const Dashboard = () => {
             );
           })}
       </div>
+      { visibleCount < employeeData.length && 
+      <div>
+        <button onClick={() => setVisibleCount((prev) => prev + 5)}>Load more</button>
+      </div>}
 
       {addEmployeeModal && (
         <div
